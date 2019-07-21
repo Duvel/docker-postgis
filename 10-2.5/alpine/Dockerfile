@@ -4,8 +4,14 @@ MAINTAINER Régis Belson <me@regisbelson.fr>
 ENV POSTGIS_VERSION 2.5.2
 ENV POSTGIS_SHA256 225aeaece00a1a6a9af15526af81bef2af27f4c198de820af1367a792ee1d1a9
 
+COPY target/testing /tmp/repo/testing
+COPY user.abuild/*.rsa.pub /etc/apk/keys/
+
 RUN set -ex \
     \
+    && echo "@custom /tmp/repo/testing" >> /etc/apk/repositories \
+    && apk --no-cache update \
+    && apk add --no-cache proj4-dev@custom \
     && apk add --no-cache --virtual .fetch-deps \
         ca-certificates \
         openssl \
@@ -36,7 +42,6 @@ RUN set -ex \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
         gdal-dev \
         geos-dev \
-        proj4-dev \
         protobuf-c-dev \
     && cd /usr/src/postgis \
     && ./autogen.sh \
@@ -53,7 +58,6 @@ RUN set -ex \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \        
         geos \
         gdal \
-        proj4 \
         protobuf-c \
     && cd / \
     && rm -rf /usr/src/postgis \
